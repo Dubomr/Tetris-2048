@@ -11,8 +11,12 @@ class Tetromino:
    SHAPES = {
       # (column_index, row_index) for each non-empty cell (tile)
       'I': [(1,0), (1,1), (1,2), (1,3)],
+      'J': [(0,0), (1,0), (1,1), (1,2)],
+      'L': [(1,0), (1,1), (1,2), (2,0)],
       'O': [(0,0), (0,1), (1,0), (1,1)],
-      'Z': [(0,1), (1,1), (1,2), (2,2)]
+      'S': [(0,1), (1,1), (1,2), (2,2)],
+      'T': [(0,1), (1,0), (1,1), (1,2)],
+      'Z': [(0,2), (1,2), (1,1), (2,1)]
    }
    
    # the dimensions of the game grid (defined as class variables)
@@ -114,6 +118,32 @@ class Tetromino:
       else:  # direction == 'down'
          self.bottom_left_cell.y -= 1
       return True  # a successful move in the given direction
+   def rotate(self, game_grid):
+    if self.type == 'O':
+        return True
+     
+    old_matrix = cp.deepcopy(self.tile_matrix)
+    
+    self.tile_matrix = np.rot90(self.tile_matrix, k=-1)
+    
+    if not self.can_be_rotated(game_grid):
+         
+        self.tile_matrix = old_matrix
+        return False 
+        
+    return True 
+   
+   def can_be_rotated(self, game_grid):
+    n = len(self.tile_matrix)
+    for row in range(n):
+        for col in range(n):
+            if self.tile_matrix[row][col] is not None:
+                
+                pos = self.get_cell_position(row, col)
+                
+                if not game_grid.is_inside(pos.y, pos.x) or game_grid.is_occupied(pos.y, pos.x):
+                    return False
+    return True
 
    # A method for checking if this tetromino can be moved in a given direction
    def can_be_moved(self, direction, game_grid):
