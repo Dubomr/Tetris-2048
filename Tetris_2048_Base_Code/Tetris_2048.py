@@ -18,10 +18,12 @@ def main():
    grid_height, grid_width = 20, 12
    # set the size of the drawing canvas (the displayed window)
    cell_size = 40
+   panel_width=4
+   total_width=grid_width+panel_width
    canvas_height, canvas_width = cell_size * grid_height, cell_size * grid_width
-   stddraw.setCanvasSize(canvas_width, canvas_height)
+   stddraw.setCanvasSize(40*total_width,40*grid_height)
    # set the x-scale and the y-scale of the drawing canvas
-   stddraw.setXscale(-0.5, grid_width - 0.5)
+   stddraw.setXscale(-0.5, total_width - 0.5)
    stddraw.setYscale(-0.5, grid_height - 0.5)
 
    # set the game grid dimension values stored and used in the Tetromino class
@@ -31,12 +33,17 @@ def main():
    grid = GameGrid(grid_height, grid_width)
    # create the first tetromino to enter the game grid
    # by using the create_tetromino function defined below
+   score=0
+   level=1
+   base_speed=500
+
+   next_tetromino = create_tetromino()
    current_tetromino = create_tetromino()
    grid.current_tetromino = current_tetromino
 
    # display a simple menu before opening the game
    # by using the display_game_menu function defined below
-   display_game_menu(grid_height, grid_width)
+   display_game_menu(grid_height, total_width)
 
    # the main game loop
    while True:
@@ -56,11 +63,20 @@ def main():
             # move the active tetromino down by one
             # (soft drop: causes the tetromino to fall down faster)
             current_tetromino.move(key_typed, grid)
-         elif key_typed == 'return' or key_typed == 'enter' or key_typed == 'space':
+         elif key_typed=='up':
             # rotate the active tetromino clockwise
             current_tetromino.rotate(grid)
+         elif key_typed=='space':
+            current_tetromino.hard_drop(grid)
+         elif key_typed=='c':
+            current_tetromino=next_tetromino
+            next_tetromino=create_tetromino()
+            grid.current_tetromino=current_tetromino
          # clear the queue of the pressed keys for a smoother interaction
          stddraw.clearKeysTyped()
+      
+      level = (score // 1024) + 1
+      current_speed = max(50, base_speed - (level - 1) * 30)
 
       # move the active tetromino down by one at each iteration (auto fall)
       success = current_tetromino.move('down', grid)
@@ -72,15 +88,21 @@ def main():
          # update the game grid by locking the tiles of the landed tetromino
          game_over = grid.update_grid(tiles, pos)
          # end the main game loop if the game is over
+         cleared_rows=grid.clear_full_rows()
+         if cleared_rows > 0:
+             score += cleared_rows * 100
          if game_over:
             break
          # create the next tetromino to enter the game grid
          # by using the create_tetromino function defined below
-         current_tetromino = create_tetromino()
+         current_tetromino = next_tetromino
+         next_tetromino=create_tetromino()
          grid.current_tetromino = current_tetromino
 
       # display the game grid with the current tetromino
       grid.display()
+      grid.draw_panel(score, next_tetromino, level)
+      stddraw.show(current_speed)
 
    # print a message on the console when the game is over
    print('Game over')
@@ -88,7 +110,7 @@ def main():
 # A function for creating random shaped tetrominoes to enter the game grid
 def create_tetromino():
    # the type (shape) of the tetromino is determined randomly
-   tetromino_types = ['I', 'J', 'L', 'O', 'S', 'T', 'Z']
+   tetromino_types =  ['I', 'J', 'L', 'O', 'S', 'T', 'Z']
    random_index = random.randint(0, len(tetromino_types) - 1)
    random_type = tetromino_types[random_index]
    # create and return the tetromino
@@ -96,7 +118,7 @@ def create_tetromino():
    return tetromino
 
 # A function for displaying a simple menu before starting the game
-def display_game_menu(grid_height, grid_width):
+def display_game_menu(grid_height, total_width):
    # the colors used for the menu
    background_color = Color(42, 69, 99)
    button_color = Color(25, 255, 228)
@@ -108,13 +130,13 @@ def display_game_menu(grid_height, grid_width):
    # build the path of the image file
    img_file = os.path.join(current_dir, 'images/menu_image.png')
    # the coordinates to display the image centered horizontally
-   img_center_x, img_center_y = (grid_width - 1) / 2, grid_height - 7
+   img_center_x, img_center_y = (total_width - 1) / 2, grid_height - 7
    # the image is modeled by using the Picture class
    image_to_display = Picture(img_file)
    # add the image to the drawing canvas
    stddraw.picture(image_to_display, img_center_x, img_center_y)
    # the dimensions for the start game button
-   button_w, button_h = grid_width - 1.5, 2
+   button_w, button_h = total_width - 1.5, 2
    # the coordinates of the bottom left corner for the start game button
    button_blc_x, button_blc_y = img_center_x - button_w / 2, 4
    # add the start game button as a filled rectangle

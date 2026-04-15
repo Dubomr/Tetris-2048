@@ -39,7 +39,6 @@ class GameGrid:
       # draw a box around the game grid
       self.draw_boundaries()
       # show the resulting drawing with a pause duration = 500 ms
-      stddraw.show(500)
 
    # A method for drawing the cells and the lines of the game grid
    def draw_grid(self):
@@ -116,3 +115,49 @@ class GameGrid:
                   self.game_over = True
       # return the value of the game_over flag
       return self.game_over
+   def clear_full_rows(self):
+      lines_cleared=0
+      row=0
+
+      while row<self.grid_height:
+
+         is_full=True
+         for col in range(self.grid_width):
+            if self.tile_matrix[row][col] is None:
+               is_full=False
+               break
+         if is_full:
+            lines_cleared+=1
+
+            for r in range(row,self.grid_height-1):
+               for c in range(self.grid_width):
+                  self.tile_matrix[r][c]=self.tile_matrix[r+1][c]
+            
+            for c in range(self.grid_width):
+               self.tile_matrix[self.grid_height-1][c]=None
+         else:
+            row+=1
+      return lines_cleared
+   
+   def draw_panel(self,score,next_tetromino,level):
+      panel_start_x=self.grid_width-0.5
+      panel_w=4
+
+      stddraw.setPenColor(Color(170,160,150))
+      stddraw.filledRectangle(panel_start_x,-0.5,panel_w,self.grid_height)
+
+      stddraw.setPenColor(stddraw.WHITE)
+      stddraw.setFontSize(24)
+      stddraw.boldText(panel_start_x+panel_w/2,self.grid_height-2,"SCORE")
+      stddraw.text(panel_start_x+panel_w/2,self.grid_height-4,str(score))
+
+      stddraw.boldText(panel_start_x + panel_w / 2, self.grid_height - 8, "LEVEL")
+      stddraw.text(panel_start_x + panel_w / 2, self.grid_height - 10, str(level))
+
+      stddraw.boldText(panel_start_x+panel_w/2,6,"NEXT")
+
+      if next_tetromino:
+         next_pos=Point()
+         next_pos.x=panel_start_x+1
+         next_pos.y=2
+         next_tetromino.draw_at_position(next_pos)
