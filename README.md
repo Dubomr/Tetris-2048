@@ -1,7 +1,5 @@
 # Tetris-2048
 
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/Dubomr/Tetris-2048)
-
 Tetris-2048 is a challenging puzzle game that merges the classic block-stacking gameplay of Tetris with the number-merging mechanics of 2048. Control falling tetrominoes made of numbered tiles, and strategically place them to create higher numbers. The ultimate goal is to form the 2048 tile while clearing lines and maximizing your score.
 
 ## Features
